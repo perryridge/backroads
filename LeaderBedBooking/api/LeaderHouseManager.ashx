@@ -4,6 +4,8 @@ using System;
 using System.Web;
 using System.Text;
 using System.Data;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Sql;
 using System.Data.SqlClient;
@@ -48,7 +50,55 @@ public class LeaderHouseManager : IHttpHandler {
                 resp = GetBeds(leaderhouseid);
                 break;
             case "Update":
-                leaderhousebedid = Convert.ToInt32(context.Request.QueryString["leaderhousebedid"]);
+                SqlCommand sqlComm;
+                
+                //leaderhousebedid = Convert.ToInt32(context.Request.QueryString["leaderhousebedid"]);
+                //from_month = Convert.ToInt32(context.Request.QueryString["from_month"]);
+                //to_month = Convert.ToInt32(context.Request.QueryString["to_month"]);
+                //from_day = Convert.ToInt32(context.Request.QueryString["from_day"]);
+                //to_day = Convert.ToInt32(context.Request.QueryString["to_day"]);
+                //num_beds = Convert.ToInt32(context.Request.QueryString["num_beds"]);
+                //num_beds_other = Convert.ToInt32(context.Request.QueryString["num_beds_other"]);
+
+                List<string> reqP = (List<string>)JsonConvert.DeserializeObject(context.Request.ToString(),typeof(List<string>));
+                
+                leader
+                from_month = Convert.ToInt32(context.Request.QueryString["from_month"]);
+                to_month = Convert.ToInt32(context.Request.QueryString["to_month"]);
+                from_day = Convert.ToInt32(context.Request.QueryString["from_day"]);
+                to_day = Convert.ToInt32(context.Request.QueryString["to_day"]);
+                num_beds = Convert.ToInt32(context.Request.QueryString["num_beds"]);
+                num_beds_other = Convert.ToInt32(context.Request.QueryString["num_beds_other"]);
+
+                conn.Open();
+                sqlComm = new SqlCommand("usp_ld_BedBooking_LeaderHouseBed_Update", conn);
+                sqlComm.CommandType = CommandType.StoredProcedure;
+                sqlComm.Parameters.AddWithValue("@iLeaderHouseBedID", leaderhousebedid);
+                sqlComm.Parameters.AddWithValue("@iLeaderHouseID", leaderhouseid);
+                sqlComm.Parameters.AddWithValue("@iFromMonth", from_month);
+                sqlComm.Parameters.AddWithValue("@iFromDay", from_day);
+                sqlComm.Parameters.AddWithValue("@iToMonth", to_month);
+                sqlComm.Parameters.AddWithValue("@iToDay", to_day);
+                sqlComm.Parameters.AddWithValue("@iNumBeds", num_beds);
+                sqlComm.Parameters.AddWithValue("@iNumBedsOther", num_beds_other);
+
+                try
+                {
+                    sqlComm.ExecuteNonQuery();
+                    resp = "success";
+                }
+                catch(Exception e)
+                {
+                    resp = e.Message;
+                }
+                
+                //SqlDataAdapter sda = new SqlDataAdapter();
+                
+                break;
+            case "Add":
+                
+                leaderhousebedid = 0;
+                leaderhouseid = Convert.ToInt32(context.Request.QueryString["leaderhouseid"]);
                 from_month = Convert.ToInt32(context.Request.QueryString["from_month"]);
                 to_month = Convert.ToInt32(context.Request.QueryString["to_month"]);
                 from_day = Convert.ToInt32(context.Request.QueryString["from_day"]);
@@ -68,13 +118,19 @@ public class LeaderHouseManager : IHttpHandler {
                 sqlComm.Parameters.AddWithValue("@iNumBeds", num_beds);
                 sqlComm.Parameters.AddWithValue("@iNumBedsOther", num_beds_other);
 
-                sqlComm.ExecuteNonQuery();
+                try
+                {
+                    sqlComm.ExecuteNonQuery();
+                    resp = "success";
+                }
+                catch(Exception e)
+                {
+                    resp = e.Message;
+                }
                 
-                //SqlDataAdapter sda = new SqlDataAdapter();
+
+                break;
                 
-                break;
-            case "Add":
-                break;
             default:
                 break;
         }
